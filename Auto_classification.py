@@ -1,174 +1,115 @@
-import os, time, shutil
-from PIL import Image
-from PIL.ExifTags import TAGS
+import os
+import sys
+import time
+import shutil
+import threading
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QGridLayout, QCheckBox, QMenu, QVBoxLayout, QHBoxLayout, \
+    QGroupBox, QLineEdit, QPushButton, QTextEdit, QComboBox, QSlider, QInputDialog
+from PyQt5.QtGui import QPixmap, QImage, QColor
+from PyQt5.QtCore import QDir, Qt, QRect, QSize, QCoreApplication
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread, QRect
+from AC_aux import *
 
-class RENAME_PHOTO_SEQUENTIALLY():
 
-    def __init__(self):
-        self.CWD = os.getcwd()
-        self.month_Dictionary = {'Jan': '01', 'Feb': '02', 'Mar': '03',
-                                 'Apr': '04', 'May': '05', 'Jun': '06',
-                                 'Jul': '07', 'Aug': '08', 'Sep': '09',
-                                 'Oct': '10', 'Nov': '11', 'Dec': '12'}
-        self.directory = "{}/photo".format(self.CWD)
-        self.files = os.listdir(self.directory)
-        for content in self.files:
-            num = 0
-            num += 1
-            if (content == "desktop.ini"):
-                print(self.files[num])
-                self.files.pop(num)
-
-        self.save_List = []
-        self.Count = 0
-        self.FLAG_GIF = False
-
-    def get_Exif(self, filename):
-        image = Image.open(filename)
-        image.verify()
-        return image._getexif()
-
-    def renaming_Function_Photo(self):
-        for file in self.files:
-            Number = 1
-            splited_File_Type = file.split('.')[1]
-            if (splited_File_Type == "gif"):
-                self.FLAG_GIF = True
-            else:
-                try:
-                    exif = self.get_Exif("{}/{}".format(self.directory, file))
-                    splited_Date_From_Time = exif[36868].split(" ")
-                    splited_Date_Data = splited_Date_From_Time[0].split(":")
-                    renamed_File = "{}{}{}_{}".format(splited_Date_Data[0], splited_Date_Data[1], splited_Date_Data[2], Number)
-                    for content in self.save_List:
-                        if (content == renamed_File):
-                            Number += 1
-                            renamed_File = "{}{}{}_{}".format(splited_Date_Data[0], splited_Date_Data[1], splited_Date_Data[2], Number)
-                    self.save_List.append(renamed_File)
-                except Exception as e:
-                    if (exif != None):
-                        unconvertable_File = "{}/{}".format(self.directory, file)
-                        Times = time.ctime(os.path.getmtime(unconvertable_File))
-                        splited_Time_Data = Times.split(' ')
-                        if (len(splited_Time_Data) == 6):
-                            splited_Time_Data.pop(2)
-                        if (len(splited_Time_Data[2]) == 1):
-                            add_Zero = "0{}".format(splited_Time_Data[2])
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                            for content in self.save_List:
-                                if (content == renamed_File):
-                                    Number += 1
-                                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                        else:
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                            for content in self.save_List:
-                                if (content == renamed_File):
-                                    Number += 1
-                                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                        self.save_List.append(renamed_File)
-
-                    elif (exif == None):
-                        nonetype_File = "{}/{}".format(self.directory, file)
-                        Times = time.ctime(os.path.getmtime(nonetype_File))
-                        splited_Time_Data = Times.split(' ')
-                        if (len(splited_Time_Data) == 6):
-                            splited_Time_Data.pop(2)
-                        if (len(splited_Time_Data[2]) == 1):
-                            add_Zero = "0{}".format(splited_Time_Data[2])
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                            for content in self.save_List:
-                                if (content == renamed_File):
-                                    Number += 1
-                                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                        else:
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                            for content in self.save_List:
-                                if (content == renamed_File):
-                                    Number += 1
-                                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                        self.save_List.append(renamed_File)
-
-            if (self.FLAG_GIF == True):
-                nonetype_File = "{}/{}".format(self.directory, file)
-                Times = time.ctime(os.path.getmtime(nonetype_File))
-                splited_Time_Data = Times.split(' ')
-                if (len(splited_Time_Data) == 6):
-                    splited_Time_Data.pop(2)
-                if (len(splited_Time_Data[2]) == 1):
-                    add_Zero = "0{}".format(splited_Time_Data[2])
-                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                    for content in self.save_List:
-                        if (content == renamed_File):
-                            Number += 1
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], add_Zero, Number)
-                else:
-                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                    for content in self.save_List:
-                        if (content == renamed_File):
-                            Number += 1
-                            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-                self.save_List.append(renamed_File)
-
-            if (self.FLAG_GIF == False):
-                os.rename("{}/{}".format(self.directory, self.files[self.Count]), "{}/{}.jpg".format(self.directory, renamed_File))
-            else:
-                os.rename("{}/{}".format(self.directory, self.files[self.Count]), "{}/{}.gif".format(self.directory, renamed_File))
-                self.FLAG_GIF = False
-            self.Count += 1
-
-        print("Photo converting is completed", self.Count)
-
-class RENAME_VIDEO_SEQUENTIALLY():
+class Ui_AcDialog(QWidget):
 
     def __init__(self):
-        self.CWD = os.getcwd()
-        self.month_Dictionary = {'Jan': '01', 'Feb': '02', 'Mar': '03',
-                                'Apr': '04', 'May': '05', 'Jun': '06',
-                                'Jul': '07', 'Aug': '08', 'Sep': '09',
-                                'Oct': '10', 'Nov': '11', 'Dec': '12'}
-        self.Count = 0
-        self.directory = "{}/video".format(self.CWD)
-        self.files = os.listdir(self.directory)
-        self.save_List = []
+        super().__init__()
+        self.initUI()
+        self.acc = None
 
-    def renaming_Function_Video(self):
-        for file in self.files:
-            Number = 1
-            Times = time.ctime(os.path.getmtime("{}/{}".format(self.directory, file)))
-            splited_Time_Data = Times.split(' ')
-            if (len(splited_Time_Data) == 6):
-                splited_Time_Data.pop(2)
-            renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-            for content in self.save_List:
-                if (content == renamed_File):
-                    Number += 1
-                    renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
-            self.save_List.append(renamed_File)
-            os.rename("{}/{}".format(self.directory, self.files[self.Count]), "{}/{}.mp4".format(self.directory, renamed_File))
-            self.Count += 1
+    def initUI(self):
+        self.setWindowTitle('Auto classification')
+        hbox = QHBoxLayout()
+        vb = QVBoxLayout()
+        vb.addLayout(self.createInfoGroup())
+        vb.addLayout(hbox)
+        self.setLayout(vb)
+        self.show()
 
-        print("Video converting is completed", self.Count)
+    def createInfoGroup(self):
+        box = QHBoxLayout()
+        self.btn = QPushButton('설명보기')
+        self.btn.clicked.connect(self.get_Help_Info)
+        box.addWidget(self.btn)
+        self.btn2 = QPushButton('바로이용')
+        self.btn2.clicked.connect(self.run_AC)
+        box.addWidget(self.btn2)
 
-def main():
-    currnent_Working_Directory = os.getcwd()
-    files = os.listdir("{}/APV".format(currnent_Working_Directory))
-    directories = os.listdir(currnent_Working_Directory)
-    if ("photo" not in directories):
-        os.mkdir("{}/photo".format(currnent_Working_Directory))
-    if ("video" not in directories):
-        os.mkdir("{}/video".format(currnent_Working_Directory))
+        self.infomsg = QTextEdit()
+        self.infomsg.setFixedWidth(500)
+        self.infomsg.setFixedHeight(300)
+        self.infomsg.setStyleSheet("background-color: black; border: 1px solid gray;")
+        self.infomsg.setTextColor(QColor(255, 255, 0))
+        self.infomsg.append(' Deerworld의 자동사진분류 프로그램입니다.')
+        self.infomsg.append(' > 사진, 동영상 파일들의 속성을 읽어 파일들을')
+        self.infomsg.append('    날짜별로 리네이밍 해주는 프로그램입니다.')
+        self.infomsg.append('    (날짜가 중복되면 _1, _2로 리네이밍합니다.)')
+        self.infomsg.append("\n 이용을 원하는 메뉴를 선택해주세요.")
 
-    for file in files:
-        splited_File_Type = file.split('.')[1]
-        if (splited_File_Type == "jpg" or splited_File_Type == "jpeg" or splited_File_Type == "png" or splited_File_Type == "gif"):
-            shutil.move("{}/APV/{}".format(currnent_Working_Directory, file), "{}/photo/{}".format(currnent_Working_Directory, file))
-        elif (splited_File_Type == "avi" or splited_File_Type == "mp4" or splited_File_Type == "mpeg"):
-            shutil.move("{}/APV/{}".format(currnent_Working_Directory, file), "{}/video/{}".format(currnent_Working_Directory, file))
+        cbox = QHBoxLayout()
+        vbox = QVBoxLayout()
+        vbox.addLayout(box)
+        vbox.addLayout(cbox)
+        vbox.addWidget(self.infomsg)
+        return vbox
 
-    RVS = RENAME_VIDEO_SEQUENTIALLY()
-    RVS.renaming_Function_Video()
-    RPS = RENAME_PHOTO_SEQUENTIALLY()
-    RPS.renaming_Function_Photo()
+    ### Functions # ====================================================================================================== #
+    def get_Help_Info(self):
+        self.infomsg.clear()
+        self.infomsg.append(" 1. Auto_classification폴더 안에 있는 APV폴더로 이동합니다.")
+        self.infomsg.append("\n 2. APV폴더 안에 변환을 원하는 jpg, gif, mp4등의 파일을 넣습니다.")
+        self.infomsg.append("\n 3. 2번이 끝났으면 '바로이용'버튼을 눌러주세요!")
+        self.infomsg.append("\n *참고 : 변환이 끝난 파일은 바탕화면에 photo, video폴더 안으로 이동됩니다.")
 
-if __name__ == "__main__":
-    main()
+    def run_AC(self):
+        bool = self.make_Directory()
+        if (bool == False):
+            self.infomsg.clear()
+            self.infomsg.append(" 변환 중...\n")
+            RVS = RENAME_VIDEO_SEQUENTIALLY()
+            RVS.renaming_Function_Video()
+            RPS = RENAME_PHOTO_SEQUENTIALLY()
+            RPS.renaming_Function_Photo()
+            self.infomsg.append(" 변환이 완료되었습니다!")
+            self.infomsg.append("\n 사진 : {}개".format(RPS.Count))
+            self.infomsg.append("\n 동영상 : {}개".format(RVS.Count))
+        else:
+            self.infomsg.clear()
+            self.infomsg.append(" APV폴더에 변환할 파일이 없거나 지원하지 않는 파일 형식입니다.")
+
+    def make_Directory(self):
+        bool = False
+        cnt = 0
+        home = os.path.expanduser('~')
+        currnent_Working_Directory = os.getcwd()
+        desktop = home + "\Desktop"
+        files = os.listdir("{}/APV".format(currnent_Working_Directory))
+        if (len(files) == 0):
+            bool = True
+            return bool
+        else:
+            directories = os.listdir(desktop)
+            if ("photo" not in directories):
+                os.mkdir("{}/photo".format(desktop))
+            if ("video" not in directories):
+                os.mkdir("{}/video".format(desktop))
+
+            for file in files:
+                splited_File_Type = file.split('.')[1]
+                if (splited_File_Type == "jpg" or splited_File_Type == "jpeg" or splited_File_Type == "png" or splited_File_Type == "gif"):
+                    cnt += 1
+                    shutil.move("{}/APV/{}".format(currnent_Working_Directory, file), "{}/photo/{}".format(desktop, file))
+                elif (splited_File_Type == "avi" or splited_File_Type == "mp4" or splited_File_Type == "mpeg"):
+                    cnt += 1
+                    shutil.move("{}/APV/{}".format(currnent_Working_Directory, file), "{}/video/{}".format(desktop, file))
+            if (cnt == 0):
+                bool = True
+            return bool
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ui = Ui_AcDialog()
+    sys.exit(app.exec_())
