@@ -142,6 +142,8 @@ class RENAME_VIDEO_SEQUENTIALLY():
             splited_Time_Data = Times.split(' ')
             if (len(splited_Time_Data) == 6):
                 splited_Time_Data.pop(2)
+            if (len(splited_Time_Data[2]) == 1):
+                splited_Time_Data[2] = "0{}".format(splited_Time_Data[2])
             renamed_File = "{}{}{}_{}".format(splited_Time_Data[4], self.month_Dictionary[splited_Time_Data[1]], splited_Time_Data[2], Number)
             for content in self.save_List:
                 if (content == renamed_File):
